@@ -32,7 +32,12 @@ def init_users_db():
     Initialize the users MySQL database with a users table.
     Requires MYSQL_HOST, MYSQL_PORT, MYSQL_USER, MYSQL_PASSWORD in .env.
     """
+    connection = None
+    cursor = None
     try:
+        # Debug: Log connection parameters (excluding password)
+        st.write(f"Attempting MySQL connection - Host: {Config.MYSQL_HOST}, Port: {Config.MYSQL_PORT}, User: {Config.MYSQL_USER}")
+        
         connection = mysql.connector.connect(
             host=Config.MYSQL_HOST,
             port=Config.MYSQL_PORT,
@@ -53,12 +58,16 @@ def init_users_db():
                 )
             """)
             connection.commit()
+            st.write("MySQL users database initialized successfully.")
     except Error as e:
-        st.error(f"Error initializing users database: {e}", icon="❌")
+        st.error(f"Error initializing users database: {e}", icon="⚠️")
+        return False
     finally:
-        if connection.is_connected():
+        if cursor is not None:
             cursor.close()
+        if connection is not None and connection.is_connected():
             connection.close()
+    return True
 
 @contextmanager
 def with_users_db_cursor():
@@ -249,7 +258,9 @@ def show_login_page():
     """
     Display the login or registration page with a neon-themed UI and full-page background image.
     """
-    init_users_db()
+    if not init_users_db():
+        st.error("Cannot proceed due to database unavailability.", icon="❌")
+        st.stop()
 
     if "auth_page" not in st.session_state:
         st.session_state.auth_page = "login"
@@ -384,7 +395,7 @@ def show_login_page():
         st.markdown(
             """
             <style>
-            @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700&display=swap');
+            @import url('https://fonts.googleapis.com/css2?family=Orbitron&display=swap');
             @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@500&display=swap');
             
             body {{
