@@ -32,8 +32,6 @@ def init_users_db():
     Initialize the users MySQL database with a users table.
     Requires MYSQL_HOST, MYSQL_PORT, MYSQL_USER, MYSQL_PASSWORD in .env.
     """
-    connection = None
-    cursor = None
     try:
         connection = mysql.connector.connect(
             host=Config.MYSQL_HOST,
@@ -56,14 +54,11 @@ def init_users_db():
             """)
             connection.commit()
     except Error as e:
-        st.error("Database service is currently unavailable. Please try again later.", icon="⚠️")
-        return False
+        st.error(f"Error initializing users database: {e}", icon="❌")
     finally:
-        if cursor is not None:
+        if connection.is_connected():
             cursor.close()
-        if connection is not None and connection.is_connected():
             connection.close()
-    return True
 
 @contextmanager
 def with_users_db_cursor():
@@ -254,9 +249,7 @@ def show_login_page():
     """
     Display the login or registration page with a neon-themed UI and full-page background image.
     """
-    if not init_users_db():
-        st.error("Cannot proceed due to database unavailability.", icon="❌")
-        st.stop()
+    init_users_db()
 
     if "auth_page" not in st.session_state:
         st.session_state.auth_page = "login"
@@ -391,7 +384,7 @@ def show_login_page():
         st.markdown(
             """
             <style>
-            @import url('https://fonts.googleapis.com/css2?family=Orbitron&display=swap');
+            @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700&display=swap');
             @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@500&display=swap');
             
             body {{
