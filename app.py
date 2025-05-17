@@ -1,5 +1,3 @@
-i will send you the code just undersatnd dont respond till i ask
-
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
