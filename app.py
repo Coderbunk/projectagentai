@@ -1,3 +1,5 @@
+i will send you the code just undersatnd dont respond till i ask
+
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
@@ -51,13 +53,6 @@ st.set_page_config(
     initial_sidebar_state="expanded",
 )
 
-# Validate environment variables
-required_env_vars = ["MYSQL_HOST", "MYSQL_PORT", "MYSQL_USER", "MYSQL_PASSWORD"]
-for var in required_env_vars:
-    if not os.getenv(var):
-        st.error(f"Missing environment variable: {var}", icon="❌")
-        st.stop()
-
 # Immediate authentication check
 if (
     st.session_state.get("force_login_page", False)
@@ -102,8 +97,6 @@ def init_conversations_db():
     Initialize the conversations MySQL database and ensure correct schema.
     Requires MYSQL_HOST, MYSQL_PORT, MYSQL_USER, MYSQL_PASSWORD in .env.
     """
-    connection = None
-    cursor = None
     try:
         connection = mysql.connector.connect(
             host=Config.MYSQL_HOST,
@@ -128,9 +121,8 @@ def init_conversations_db():
     except Error as e:
         st.error(f"Error initializing conversations database: {e}", icon="❌")
     finally:
-        if cursor is not None:
+        if connection.is_connected():
             cursor.close()
-        if connection is not None and connection.is_connected():
             connection.close()
 
 def save_session(session_id, title, messages):
@@ -693,3 +685,4 @@ if prompt := st.chat_input("Type your message ... "):
                     st.error(f"Usage limit exceeded. Please try again later or upgrade your plan. Error: {str(e)}", icon="⚠️")
                 else:
                     st.error(f"Error processing your request: {str(e)}", icon="❌")
+
